@@ -1,5 +1,7 @@
 package db
 
+import "errors"
+
 /*
  * @author       Intha-amnouay Marc
  * @mail         marc.inthaamnouay@gmail.com
@@ -22,25 +24,35 @@ type dbInterface interface {
 }
 
 /*
+ * MakeError
+ *		a function which throw an error
+ */
+func makeError() error {
+	err := errors.New("Not implemented")
+
+	return err
+}
+
+/*
  * SaveProduct
  *      Save the product
  */
-func (db database) saveProduct() {
-
+func (db database) saveProduct() error {
+	return makeError()
 }
 
 /*
  * SaveUser
  *      Save the user
  */
-func (db database) saveUser() {
-
+func (db database) saveUser() error {
+	return makeError()
 }
 
 /*
  * SaveExchange
  *      Save the exchange
  */
-func (db database) saveExchange() {
-
+func (db database) saveExchange() error {
+	return makeError()
 }

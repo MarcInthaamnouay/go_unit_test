@@ -1,4 +1,4 @@
-package main
+package start
 
 /*
  * @author       Intha-amnouay Marc
@@ -30,7 +30,16 @@ type User interface {
 	getAge() int
 }
 
-func createUser(email string, firstname string, name string, age int) *UserStruct {
+/*
+ * CreateUser
+ *		Method which create a new user it mimick the Java constructor ...
+ *		Note that in GO it's recommend to use directly the strucutre to create an object..
+ *	@Params {email} string
+ *	@Params {Firstname} string
+ *	@Params {name} string
+ *	@Params {age} int
+ */
+func CreateUser(email string, firstname string, name string, age int) *UserStruct {
 	user := &UserStruct{
 		Email:     email,
 		Firstname: firstname,
@@ -49,7 +58,7 @@ func createUser(email string, firstname string, name string, age int) *UserStruc
  * @Params {User} UserStruct
  * @Return {Bool} Boolean
  */
-func (user *UserStruct) isValid() bool {
+func (user *UserStruct) IsValid() bool {
 	if len(user.Firstname) > 0 && len(user.Name) > 0 && user.Age > 13 {
 		// Checking the mail adress
 		checkAdd, err := mail.ParseAddress(user.Email)
@@ -141,24 +150,4 @@ func (user *UserStruct) getLastName() string {
  */
 func (user *UserStruct) getAge() int {
 	return user.Age
-}
-
-/*
- * Main <Void>
- *     Main function of the program
- */
-func main() {
-	user := createUser("marc@gmail.com", "marc", "intha", 18)
-	fmt.Println(user)
-
-	// Check if the user is valid
-	isValid := user.isValid()
-
-	fmt.Println("est-ce que je suis valide ? %n", isValid)
-
-	// try to set the value
-
-	fmt.Println(user.getAge())
-	user.setAge(21)
-	fmt.Println(user)
 }
