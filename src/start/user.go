@@ -8,26 +8,16 @@ package start
  * @run routine  $GOPATH/bin/start
  */
 
-import "net/mail"
-import "fmt"
+import (
+	"fmt"
+	"net/mail"
+)
 
 type UserStruct struct {
 	Email     string
 	Firstname string
 	Name      string
 	Age       int
-}
-
-type User interface {
-	isValid() bool
-	setEmail(string)
-	setFirstname(string)
-	setLastname(string)
-	setAge(int)
-	getEmail() string
-	getFirstname() string
-	getLastname() string
-	getAge() int
 }
 
 /*
@@ -79,7 +69,7 @@ func (user *UserStruct) IsValid() bool {
  *      Set the mail of the user
  * @Params {mail} string
  */
-func (user *UserStruct) setEmail(mail string) {
+func (user *UserStruct) SetEmail(mail string) {
 	fmt.Println(mail)
 	user.Email = mail
 	fmt.Println(user)
@@ -90,7 +80,7 @@ func (user *UserStruct) setEmail(mail string) {
  *      Set the firstname of the user
  * @Params {name} string
  */
-func (user *UserStruct) setFirstname(firstname string) {
+func (user *UserStruct) SetFirstName(firstname string) {
 	user.Firstname = firstname
 }
 
@@ -99,7 +89,7 @@ func (user *UserStruct) setFirstname(firstname string) {
  *      Set the lastname of the user
  * @Params {lastname} string
  */
-func (user *UserStruct) setLastName(lastname string) {
+func (user *UserStruct) SetName(lastname string) {
 	user.Name = lastname
 }
 
@@ -108,7 +98,7 @@ func (user *UserStruct) setLastName(lastname string) {
  *      Set the age of the user
  * @Params {age} Int
  */
-func (user *UserStruct) setAge(age int) {
+func (user *UserStruct) SetAge(age int) {
 	user.Age = age
 }
 
@@ -118,7 +108,7 @@ func (user *UserStruct) setAge(age int) {
  * @Params {user} UserStruct
  * @Return {mail} string
  */
-func (user *UserStruct) getEmail() string {
+func (user *UserStruct) GetEmail() string {
 	return user.Email
 }
 
@@ -128,17 +118,17 @@ func (user *UserStruct) getEmail() string {
  * @Params {user} UserStruct
  * @Return {firstname} string
  */
-func (user *UserStruct) getFirstname() string {
+func (user *UserStruct) GetFirstName() string {
 	return user.Firstname
 }
 
 /*
- * GetLastName
+ * GetName
  *      Get the last name of the user
  * @Params {user} UserStruct
  * @Return {name} string
  */
-func (user *UserStruct) getLastName() string {
+func (user *UserStruct) GetName() string {
 	return user.Name
 }
 
@@ -148,6 +138,6 @@ func (user *UserStruct) getLastName() string {
  * @Prams {user} UserStruct
  * @Return {age} int
  */
-func (user *UserStruct) getAge() int {
+func (user *UserStruct) GetAge() int {
 	return user.Age
 }
