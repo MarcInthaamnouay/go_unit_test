@@ -3,7 +3,7 @@ package mail
 import "errors"
 
 type Mail interface {
-	sendMail() error
+	SendMail() error
 }
 
 type MailContructor struct {
@@ -12,7 +12,7 @@ type MailContructor struct {
 	object string
 }
 
-func (m MailContructor) sendMail() error {
+func (m MailContructor) SendMail() error {
 	// Throwing an error without stopic the go program
 	err := errors.New("Mail has not been implemented")
 

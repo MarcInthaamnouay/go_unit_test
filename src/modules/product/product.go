@@ -1,5 +1,7 @@
 package product
 
+import "modules/receiver"
+
 /*
  * @author       Intha-amnouay Marc
  * @mail         marc.inthaamnouay@gmail.com
@@ -8,22 +10,19 @@ package product
  * @run routine  $GOPATH/bin/product
  */
 
-import "start"
-
-type product struct {
+type Product struct {
 	Name   string
 	Status int
-	Owner  *start.UserStruct
+	Owner  *receiver.UserStruct
 }
 
-type Product interface {
-	isValid() bool
-	setName()
-	setStatus()
-	setOwner()
-	getName() string
-	getStatus() int
-	getOwner() string
+type P interface {
+	IsValid() bool
+	GetName() string
+	SetName() string
+	GetOwner() string
+	SetOwner() string
+	GetStatus() string
 }
 
 /*
@@ -33,8 +32,8 @@ type Product interface {
  * @Params {status} int
  * @Params {owner} *UserStruct
  */
-func CreateProduct(name string, status int, ow *start.UserStruct) *product {
-	pr := &product{
+func CreateProduct(name string, status int, ow *receiver.UserStruct) *Product {
+	pr := &Product{
 		Name:   name,
 		Status: status,
 		Owner:  ow,
@@ -48,7 +47,7 @@ func CreateProduct(name string, status int, ow *start.UserStruct) *product {
  *      Check if the product is valid
  * @Params {p} product
  */
-func (p *product) IsValid() bool {
+func (p *Product) IsValid() bool {
 	if len(p.Name) > 0 && p.Owner != nil {
 		if p.Owner.IsValid() {
 			return true
@@ -65,7 +64,7 @@ func (p *product) IsValid() bool {
  *      Set the name of the product
  * @Params {name} string
  */
-func (p *product) SetName(name string) {
+func (p *Product) SetName(name string) {
 	p.Name = name
 }
 
@@ -74,7 +73,7 @@ func (p *product) SetName(name string) {
  *      Set the status of the product
  * @Params {status} int
  */
-func (p *product) SetStatus(status int) {
+func (p *Product) SetStatus(status int) {
 	p.Status = status
 }
 
@@ -83,7 +82,7 @@ func (p *product) SetStatus(status int) {
  *      Set the owner of the product
  * @Params {owner} UserStruct (From start package | user.go)
  */
-func (p *product) SetOwner(owner *start.UserStruct) {
+func (p *Product) SetOwner(owner *receiver.UserStruct) {
 	p.Owner = owner
 }
 
@@ -92,7 +91,7 @@ func (p *product) SetOwner(owner *start.UserStruct) {
  *      Return the name of the product
  * @Return {name} string
  */
-func (p *product) GetName() string {
+func (p *Product) GetName() string {
 	return p.Name
 }
 
@@ -101,7 +100,7 @@ func (p *product) GetName() string {
  *      Return the status of the product
  * @Return {status} int
  */
-func (p *product) GetSatus() int {
+func (p *Product) GetSatus() int {
 	return p.Status
 }
 
@@ -110,6 +109,6 @@ func (p *product) GetSatus() int {
  *      Get the owner of the product
  * @Return {owner} UserStruct (From start package | user.go)
  */
-func (p *product) GetOwner() *start.UserStruct {
+func (p *Product) GetOwner() *receiver.UserStruct {
 	return p.Owner
 }

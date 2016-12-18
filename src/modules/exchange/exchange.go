@@ -1,34 +1,43 @@
 package exchange
 
-import ("Receiver"
-        "Product"
+import (
+	"modules/db"
+	"modules/product"
+	"modules/receiver"
+	"time"
 )
 
-// Interface of the golang
-
-type Receiver struct{
-    email string
-    firstname string
-    name string
-    age int
+type Exchange struct {
+	receiver  *receiver.UserStruct
+	product   product.Product
+	startDate string
+	endDate   string
+	sender    mailSender.MailContructor
+	db        db.database
 }
 
-type ExchangeStruct struct{
-    receiver Receiver
-    product Product
+type eInterface interface {
+	save() boolean
 }
 
-/*
- * Exchange Interface
- *   
- */
+func (e Exchange) save() boolean {
+	dateNow := time.Now()
+	formatStartDate, _errStart := time.Parse(RFC3339, e.startDate)
+	formatEndDate, _errEnd := time.Parse(RFC3339, e.endDate)
 
-type Exchange interface{
-    constructObj() User
-    isValid() bool
-    save() bool
+	if e.receiver.IsValid() && e.product.IsValid() {
+		// convert the start date and the end date to a real date
+		if formatStartDate.After(dateNow) && formatEndDate.After(dateNow) {
+			if formatStartDate.Before(formatEndDate) && formatEndDate.After(formatStartDate) {
+				if receiver.GetAge() < 18 {
+					e.sender.sendMail()
+				}
+				return true
+			} else {
+				return false
+			}
+		}
+	}
+
+	return true
 }
-
-
-
-

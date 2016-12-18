@@ -10,7 +10,7 @@ import "errors"
  * @run routine  $GOPATH/bin/start
  */
 
-type database struct {
+type Database struct {
 	username string
 	password string
 	hostname string
