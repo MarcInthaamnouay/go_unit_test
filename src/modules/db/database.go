@@ -18,9 +18,9 @@ type Database struct {
 }
 
 type dbInterface interface {
-	saveProduct()
-	saveUser()
-	saveExchange()
+	SaveProduct() error
+	SaveUser() error
+	SaveExchange() error
 }
 
 /*
@@ -37,7 +37,7 @@ func makeError() error {
  * SaveProduct
  *      Save the product
  */
-func (db database) saveProduct() error {
+func (db Database) saveProduct() error {
 	return makeError()
 }
 
@@ -45,7 +45,7 @@ func (db database) saveProduct() error {
  * SaveUser
  *      Save the user
  */
-func (db database) saveUser() error {
+func (db Database) saveUser() error {
 	return makeError()
 }
 
@@ -53,6 +53,6 @@ func (db database) saveUser() error {
  * SaveExchange
  *      Save the exchange
  */
-func (db database) saveExchange() error {
+func (db Database) SaveExchange() error {
 	return makeError()
 }

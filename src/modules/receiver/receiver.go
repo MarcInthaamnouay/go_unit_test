@@ -21,16 +21,9 @@ type UserStruct struct {
 }
 
 type user interface {
-	CreateUser() *UserStruct
 	IsValid() bool
-	SetEmail(string)
-	GetEmail() string
-	SetFirstName(string)
-	GetFirstname() string
-	SetName(string)
-	GetName() string
-	SetAge(int)
-	GetAge() int
+	CreateUser(m string, f string, n string, a int) (string, string, string, int)
+	GetAge() bool
 }
 
 /*

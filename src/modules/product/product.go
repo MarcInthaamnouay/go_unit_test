@@ -23,6 +23,7 @@ type P interface {
 	GetOwner() string
 	SetOwner() string
 	GetStatus() string
+	CreateProduct(n string, s int, ow *receiver.UserStruct) (string, int, *receiver.UserStruct)
 }
 
 /*
