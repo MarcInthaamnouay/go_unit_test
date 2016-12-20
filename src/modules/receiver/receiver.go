@@ -23,8 +23,7 @@ type UserStruct struct {
 type user interface {
 	IsValid() bool
 	CreateUser(m string, f string, n string, a int) (string, string, string, int)
-	GetAge() int
-	GetEmail() string
+	GetAge() bool
 }
 
 /*

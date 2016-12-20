@@ -1,56 +1,43 @@
 package exchange
 
 import (
-	"errors"
-	"fmt"
-	"modules/mailSender"
+	"modules/db"
 	"modules/product"
 	"modules/receiver"
 	"time"
 )
 
 type Exchange struct {
-	Receiver  *receiver.UserStruct
-	Product   product.Product
-	StartDate string
-	EndDate   string
+	receiver  *receiver.UserStruct
+	product   product.Product
+	startDate string
+	endDate   string
+	sender    mailSender.MailContructor
+	db        db.database
 }
 
 type eInterface interface {
-	save() bool
+	save() boolean
 }
 
-func (e Exchange) Save() (bool, error) {
+func (e Exchange) save() boolean {
+	dateNow := time.Now()
+	formatStartDate, _errStart := time.Parse(RFC3339, e.startDate)
+	formatEndDate, _errEnd := time.Parse(RFC3339, e.endDate)
 
-	const shortForm = "2006-Jan-02"
-	dateNowStr := time.Now().Format(shortForm)
-	formatStartDate, _errStart := time.Parse(shortForm, e.StartDate)
-	formatEndDate, _errEnd := time.Parse(shortForm, e.EndDate)
-	dateNow, _errNow := time.Parse(shortForm, dateNowStr)
-
-	if _errStart != nil || _errEnd != nil || _errNow != nil {
-		return false, errors.New("time is not valid")
-	}
-
-	fmt.Println("before start date ? ", formatStartDate.Before(formatEndDate))
-	fmt.Println("after start date ? ", formatEndDate.After(formatStartDate))
-
-	if e.Receiver.IsValid() && e.Product.IsValid() {
+	if e.receiver.IsValid() && e.product.IsValid() {
 		// convert the start date and the end date to a real date
 		if formatStartDate.After(dateNow) && formatEndDate.After(dateNow) {
 			if formatStartDate.Before(formatEndDate) && formatEndDate.After(formatStartDate) {
-				if e.Receiver.GetAge() < 18 {
-					mail.SendMail(e.Receiver.GetEmail(), "You're under 18", "Order information")
+				if receiver.GetAge() < 18 {
+					e.sender.sendMail()
 				}
-				return true, nil
+				return true
 			} else {
-				return false, errors.New("Please check the date")
+				return false
 			}
-		} else {
-			return false, errors.New("Please use a date that's after today")
 		}
 	}
 
-	return false, errors.New("Product or User isn't valid")
-
+	return true
 }
