@@ -48,10 +48,11 @@ func (_mr *_MockdbInterfaceRecorder) SaveUser() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveUser")
 }
 
-func (_m *MockdbInterface) SaveExchange() error {
+func (_m *MockdbInterface) SaveExchange() (string, error) {
 	ret := _m.ctrl.Call(_m, "SaveExchange")
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 func (_mr *_MockdbInterfaceRecorder) SaveExchange() *gomock.Call {

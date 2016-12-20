@@ -28,12 +28,13 @@ func (_m *MockMail) EXPECT() *_MockMailRecorder {
 	return _m.recorder
 }
 
-func (_m *MockMail) SendMail() error {
-	ret := _m.ctrl.Call(_m, "SendMail")
-	ret0, _ := ret[0].(error)
-	return ret0
+func (_m *MockMail) SendMail(s string, t string, o string) (bool, error) {
+	ret := _m.ctrl.Call(_m, "SendMail", s, t, o)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-func (_mr *_MockMailRecorder) SendMail() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "SendMail")
+func (_mr *_MockMailRecorder) SendMail(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SendMail", arg0, arg1, arg2)
 }
