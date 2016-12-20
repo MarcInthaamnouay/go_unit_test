@@ -20,7 +20,7 @@ type Database struct {
 type dbInterface interface {
 	SaveProduct() error
 	SaveUser() error
-	SaveExchange() error
+	SaveExchange() (string, error)
 }
 
 /*
@@ -53,6 +53,6 @@ func (db Database) saveUser() error {
  * SaveExchange
  *      Save the exchange
  */
-func (db Database) SaveExchange() error {
-	return makeError()
+func (db Database) SaveExchange() (string, error) {
+	return "", makeError()
 }

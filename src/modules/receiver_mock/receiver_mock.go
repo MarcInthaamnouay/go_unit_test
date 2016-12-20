@@ -51,12 +51,22 @@ func (_mr *_MockuserRecorder) CreateUser(arg0, arg1, arg2, arg3 interface{}) *go
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "CreateUser", arg0, arg1, arg2, arg3)
 }
 
-func (_m *Mockuser) GetAge() bool {
+func (_m *Mockuser) GetAge() int {
 	ret := _m.ctrl.Call(_m, "GetAge")
-	ret0, _ := ret[0].(bool)
+	ret0, _ := ret[0].(int)
 	return ret0
 }
 
 func (_mr *_MockuserRecorder) GetAge() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetAge")
+}
+
+func (_m *Mockuser) GetEmail() string {
+	ret := _m.ctrl.Call(_m, "GetEmail")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+func (_mr *_MockuserRecorder) GetEmail() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetEmail")
 }
