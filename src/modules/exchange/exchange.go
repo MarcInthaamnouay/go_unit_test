@@ -12,8 +12,8 @@ import (
 type Exchange struct {
 	Receiver  *receiver.UserStruct
 	Product   product.Product
-	StartDate string
-	EndDate   string
+	StartDate time.Time
+	EndDate   time.Time
 }
 
 type eInterface interface {
@@ -22,7 +22,7 @@ type eInterface interface {
 
 func (e Exchange) Save() (bool, error) {
 
-	dateNow, _errNow := GetFormatTime("now")
+	dateNow, _errNow := GetFormatTime(time.Now())
 	formatStartDate, _errStart := GetFormatTime(e.StartDate)
 	formatEndDate, _errEnd := GetFormatTime(e.EndDate)
 
@@ -53,22 +53,14 @@ func (e Exchange) Save() (bool, error) {
 
 }
 
-func GetFormatTime(t string) (time.Time, error) {
+func GetFormatTime(inputTime time.Time) (time.Time, error) {
 	const shortForm = "2006-Jan-02"
-	if t == "now" {
-		now, _enow := time.Parse(shortForm, time.Now().Format(shortForm))
-		if _enow != nil {
-			return time.Now(), errors.New("Error while converting time.now to format shortForm")
-		}
 
-		return now, nil
+	timeFormat, _errTime := time.Parse(shortForm, inputTime.Format(shortForm))
+
+	if _errTime != nil {
+		return inputTime, errors.New("an error has occured while converting the time")
 	}
 
-	newTime, _e := time.Parse(shortForm, t)
-
-	if _e != nil {
-		return time.Now(), errors.New("time is not valid")
-	}
-
-	return newTime, nil
+	return timeFormat, nil
 }

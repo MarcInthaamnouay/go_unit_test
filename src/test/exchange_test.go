@@ -10,6 +10,7 @@ import (
 	"modules/receiver"
 	"modules/receiver_mock"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -22,8 +23,8 @@ type ExchangeMock struct {
 	ProductM  *mock_product.MockP
 	DbM       *mock_db.MockdbInterface
 	MailM     *mock_mail.MockMail
-	StartDate string
-	EndDate   string
+	StartDate time.Time
+	EndDate   time.Time
 }
 
 /*
@@ -60,9 +61,15 @@ func GetExchangeMock(t *testing.T) ExchangeMock {
 	receiverObj := mock_receiver.NewMockuser(receiverMockCtrl)
 	// Mock the create user constructor
 	receiverObj.EXPECT().CreateUser("joe@doe.com", "doe", "john", 10).Return("john@gmail.com", "doe", "john", 30)
-	receiverObj.EXPECT().GetAge().Return(21)
-	receiverObj.EXPECT().GetEmail().Return("angela.zhang@icbc.com")
-	receiverObj.EXPECT().IsValid().Return(true)
+	receiverObj.EXPECT().GetEmail().Return("angela.zhang@icbc.com").AnyTimes()
+	receiverObj.EXPECT().IsValid().Return(true).AnyTimes()
+
+	// Chaining the call of GetAge
+	gomock.InOrder(
+		receiverObj.EXPECT().GetAge().Return(21),
+		receiverObj.EXPECT().GetAge().Return(16),
+		receiverObj.EXPECT().GetAge().Return(17),
+	)
 
 	mail, firstname, name, age := receiverObj.CreateUser("joe@doe.com", "doe", "john", 10)
 
@@ -76,28 +83,30 @@ func GetExchangeMock(t *testing.T) ExchangeMock {
 	}
 
 	senderObj := mock_receiver.NewMockuser(senderMockCtrl)
-	senderObj.EXPECT().GetEmail().Return("jiang.jianqing@icbc.com")
+	senderObj.EXPECT().GetEmail().Return("jiang.jianqing@icbc.com").AnyTimes()
 
 	// fmt.Println("person ", person)
-
-	// Mock the isValid function by returning true
-	isValid := mock_receiver.NewMockuser(receiverMockCtrl)
-	isValid.EXPECT().IsValid().Return(true)
 
 	// Mock a product
 	pr := mock_product.NewMockP(productMockCtrl)
 	// Mocking the create product constructor
 	pr.EXPECT().CreateProduct("chopstick", 2, person).Return("chopstick", 2, person)
-	pr.EXPECT().IsValid().Return(true)
+	pr.EXPECT().IsValid().Return(true).MaxTimes(3)
+	//@TODO to see if it works..
+	pr.EXPECT().IsValid().Return(false).MaxTimes(3)
+
 	// Just like the product, we can't mock the product struct in go so we pass the original product struct
 
 	// Mocking the Database
 	dbObj := mock_db.NewMockdbInterface(dbMockCtrl)
-	dbObj.EXPECT().SaveExchange().Return("", nil)
+	dbObj.EXPECT().SaveExchange().Return(true, nil).MaxTimes(3)
 
 	// Mocking the SendMail
 	mailObj := mock_mail.NewMockMail(mailMockCtrl)
-	mailObj.EXPECT().SendMail("john@doe.com", "otherdoe@.com", "test").Return(true, nil)
+	gomock.InOrder(
+		mailObj.EXPECT().SendMail("angela.zhang@icbc.com", "jiang.jianqing@icbc.com", "Please take care of our new chopstick collection").Return(true, nil),
+		mailObj.EXPECT().SendMail("angela.zhang@icbc.com", "jiang.jianqing@icbc.com", "Please take care of our new chopstick collection").Return(false, errors.New("An error occured while sending the mail")),
+	)
 
 	// Now we can test our Exchange class here....
 	// Creating a new Exchange (we don't need a constructor as GO prefer composition over inheritance..)
@@ -108,11 +117,12 @@ func GetExchangeMock(t *testing.T) ExchangeMock {
 
 	sv := ExchangeMock{
 		ReceiverM: receiverObj,
+		SenderM:   senderObj,
 		ProductM:  pr,
 		DbM:       dbObj,
 		MailM:     mailObj,
-		StartDate: "2016-Dec-24",
-		EndDate:   "2016-Dec-25",
+		StartDate: time.Now().AddDate(0, 0, 1),
+		EndDate:   time.Now().AddDate(0, 0, 2),
 	}
 
 	// Making some test using our mock...
@@ -140,7 +150,7 @@ func GetExchangeMock(t *testing.T) ExchangeMock {
  * @Return {error} errors
  */
 func (e ExchangeMock) saveMock() (bool, error) {
-	dateNow, _errNow := exchange.GetFormatTime("now")
+	dateNow, _errNow := exchange.GetFormatTime(time.Now())
 	formatStartDate, _errStart := exchange.GetFormatTime(e.StartDate)
 	formatEndDate, _errEnd := exchange.GetFormatTime(e.EndDate)
 
@@ -152,9 +162,17 @@ func (e ExchangeMock) saveMock() (bool, error) {
 		// convert the start date and the end date to a real date
 		if formatStartDate.After(dateNow) && formatEndDate.After(dateNow) {
 			if formatStartDate.Before(formatEndDate) && formatEndDate.After(formatStartDate) {
-				if e.ReceiverM.GetAge() < 18 {
-					e.MailM.SendMail(e.ReceiverM.GetEmail(), e.SenderM.GetEmail(), "Please take care of our new chopstick collection")
+				age := e.ReceiverM.GetAge()
+				fmt.Println(age)
+
+				if age < 18 {
+					_, _err := e.MailM.SendMail(e.ReceiverM.GetEmail(), e.SenderM.GetEmail(), "Please take care of our new chopstick collection")
+
+					if _err != nil {
+						return false, errors.New("An error occured while sending the mail")
+					}
 				}
+
 				// Send the data in the Database
 				res, _errDB := e.DbM.SaveExchange()
 
@@ -179,23 +197,24 @@ func (e ExchangeMock) saveMock() (bool, error) {
 ////////////////////////////////////////////////
 //											  //
 //				  UNIT TEST 				  //
-//	   We use the testify assert package	  //
+//	   			  DATE TEST					  //
 ////////////////////////////////////////////////
 
 // @TODO rename TestMock into a getMock with the param that we want
 // So we can return the struct the object that interest us or directly the struct
 // Therefore we can test in the Test function
-func TestDate(t *testing.T) {
+func TestGoodOrderDate(t *testing.T) {
 	// Call the GetMock function
 	localStruct := GetExchangeMock(t)
-
-	localStruct.StartDate = "2016-Dec-24"
-	localStruct.EndDate = "2016-Dec-25"
+	// We set the date of today + 1
+	localStruct.StartDate = time.Now().AddDate(0, 0, 1)
+	// We set the date of today + 2
+	localStruct.EndDate = time.Now().AddDate(0, 0, 2)
 
 	r, _e := localStruct.saveMock()
 
 	if _e != nil {
-		assert.Fail(t, "an error happened while comparing 2 dates")
+		assert.Fail(t, "Error catch, an error happened while testing the date")
 		fmt.Println(_e)
 	}
 
@@ -204,6 +223,92 @@ func TestDate(t *testing.T) {
 	if result {
 		t.Logf("TestDate using normal date is a success")
 	}
+}
+
+func TestBadOrderDate(t *testing.T) {
+	// First get a copy of our structure
+	badDateStructure := GetExchangeMock(t)
+	// Now set the date we're going to set the following date
+	// Today date - 1
+	// Today date + 1
+	badDateStructure.StartDate = time.Now().AddDate(0, 0, -1)
+	badDateStructure.EndDate = time.Now().AddDate(0, 0, 1)
+
+	// Call our saveMock function
+	res, _e := badDateStructure.saveMock()
+	// Testing the exchange class using EqualError
+	// If the saveMock function return true then the test has failed
+	if res != false {
+		assert.Fail(t, "Test failed TestBadOrderDate")
+	}
+	// assert the error and chekc if the string is the one that we input
+	result := assert.EqualError(t, _e, "Please use a date that's after today", "working")
+
+	if result {
+		t.Logf("Test TestBadOrderDate pass")
+	}
+}
+
+func TestStartAfter(t *testing.T) {
+	// First get a copy of our structure
+	badStartDateStructure := GetExchangeMock(t)
+	// Now set the date we're going to set the following date
+	// Today date + 3
+	// Today date + 1
+	badStartDateStructure.StartDate = time.Now().AddDate(0, 0, 3)
+	badStartDateStructure.EndDate = time.Now().AddDate(0, 0, 1)
+
+	// Call our saveMock function
+	res, _e := badStartDateStructure.saveMock()
+	// Testing the exchange class using EqualError
+	// If the saveMock function return true then the test has failed
+	if res != false {
+		assert.Fail(t, "Test failed TestStartAfter")
+	}
+
+	// assert the error and chekc if the string is the one that we input
+	result := assert.EqualError(t, _e, "Please check the date", "working")
+
+	if result {
+		t.Logf("Test TestStartAfter pass")
+	}
+}
+
+////////////////////////////////////////////////
+//											  //
+//				  UNIT TEST 				  //
+// 			AGE AND MAIL SENDING 			  //
+////////////////////////////////////////////////
+
+// 2 test in one function
+func TestAgeForMail(t *testing.T) {
+	// Copy our struct
+	assert := assert.New(t)
+	ageTestStruct := GetExchangeMock(t)
+
+	// Testing the first call with an age of 21
+	firstCall, _fErr := ageTestStruct.saveMock()
+	if _fErr != nil {
+		assert.Fail("error while trying to save the exchange with a user of 21")
+	}
+
+	assert.Equal(firstCall, true, "call is ok")
+
+	// Testing the first call with an age of 16 it should send a mail
+	secondCall, _sErr := ageTestStruct.saveMock()
+	if _sErr != nil {
+		assert.Fail("error happened while trying to send a mail, user of 18")
+	}
+
+	assert.Equal(secondCall, true, "second call is ok..")
+
+	// Testing the first call with an age of 16 it should send a mail
+	thirdCall, _tErr := ageTestStruct.saveMock()
+	if thirdCall != false {
+		assert.Fail("the mail should have not been send")
+	}
+
+	assert.EqualError(_tErr, "An error occured while sending the mail")
 }
 
 /*
