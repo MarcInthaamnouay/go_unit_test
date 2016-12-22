@@ -4,14 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"modules/db_mock"
+	"modules/exchange"
 	"modules/mail_mock"
 	"modules/product_mock"
 	"modules/receiver"
 	"modules/receiver_mock"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 // Define the object that use the saveMock function
@@ -26,7 +27,7 @@ type ExchangeMock struct {
 }
 
 /*
- * TestExchange
+ * GetExchangeMock
  *      TestExchange is the whole function which go will use to test our Exchange Package (there's no Class in GO)
  *      As we need to use the testing package therefore we can't mock the Exchange package in the exchange package but only in the *_test.go files.
  *      Using the go test -v *_test.go
@@ -37,7 +38,7 @@ type ExchangeMock struct {
  * @Params {t} *testing
  *
  */
-func TestExchange(t *testing.T) {
+func GetExchangeMock(t *testing.T) ExchangeMock {
 
 	// Define the controller of our different package
 	// Receiver
@@ -116,13 +117,15 @@ func TestExchange(t *testing.T) {
 
 	// Making some test using our mock...
 
-	validTest, _errValid := sv.saveMock()
+	// validTest, _errValid := sv.saveMock()
 
-	if _errValid != nil {
-		fmt.Println("error during save mock test")
-	}
+	// if _errValid != nil {
+	// 	fmt.Println("error during save mock test")
+	// }
 
-	fmt.Println("test valid ! mock save", validTest)
+	// fmt.Println("test valid ! mock save", validTest)
+
+	return sv
 }
 
 /*
@@ -130,24 +133,20 @@ func TestExchange(t *testing.T) {
  *		this function is mimicking the exchange.mock function in the original
  *		Exchange package. The difference is that it used the Mock struct instead
  *		of the original one.
+ *		We did not put it in the Original Exchange module as it would create a circular depedency
  * @Private
  * @Compositon parameters {ExchangeMock} structure
  * @Return {bool} boolean
  * @Return {error} errors
  */
 func (e ExchangeMock) saveMock() (bool, error) {
-	const shortForm = "2006-Jan-02"
-	dateNowStr := time.Now().Format(shortForm)
-	formatStartDate, _errStart := time.Parse(shortForm, e.StartDate)
-	formatEndDate, _errEnd := time.Parse(shortForm, e.EndDate)
-	dateNow, _errNow := time.Parse(shortForm, dateNowStr)
+	dateNow, _errNow := exchange.GetFormatTime("now")
+	formatStartDate, _errStart := exchange.GetFormatTime(e.StartDate)
+	formatEndDate, _errEnd := exchange.GetFormatTime(e.EndDate)
 
 	if _errStart != nil || _errEnd != nil || _errNow != nil {
 		return false, errors.New("time is not valid")
 	}
-
-	fmt.Println("before start date ? ", formatStartDate.Before(formatEndDate))
-	fmt.Println("after start date ? ", formatEndDate.After(formatStartDate))
 
 	if e.ReceiverM.IsValid() && e.ProductM.IsValid() {
 		// convert the start date and the end date to a real date
@@ -175,6 +174,36 @@ func (e ExchangeMock) saveMock() (bool, error) {
 	}
 
 	return false, errors.New("Product or User isn't valid")
+}
+
+////////////////////////////////////////////////
+//											  //
+//				  UNIT TEST 				  //
+//	   We use the testify assert package	  //
+////////////////////////////////////////////////
+
+// @TODO rename TestMock into a getMock with the param that we want
+// So we can return the struct the object that interest us or directly the struct
+// Therefore we can test in the Test function
+func TestDate(t *testing.T) {
+	// Call the GetMock function
+	localStruct := GetExchangeMock(t)
+
+	localStruct.StartDate = "2016-Dec-24"
+	localStruct.EndDate = "2016-Dec-25"
+
+	r, _e := localStruct.saveMock()
+
+	if _e != nil {
+		assert.Fail(t, "an error happened while comparing 2 dates")
+		fmt.Println(_e)
+	}
+
+	result := assert.Equal(t, r, true, "Time should be equal to true")
+
+	if result {
+		t.Logf("TestDate using normal date is a success")
+	}
 }
 
 /*

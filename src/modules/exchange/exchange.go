@@ -22,11 +22,9 @@ type eInterface interface {
 
 func (e Exchange) Save() (bool, error) {
 
-	const shortForm = "2006-Jan-02"
-	dateNowStr := time.Now().Format(shortForm)
-	formatStartDate, _errStart := time.Parse(shortForm, e.StartDate)
-	formatEndDate, _errEnd := time.Parse(shortForm, e.EndDate)
-	dateNow, _errNow := time.Parse(shortForm, dateNowStr)
+	dateNow, _errNow := GetFormatTime("now")
+	formatStartDate, _errStart := GetFormatTime(e.StartDate)
+	formatEndDate, _errEnd := GetFormatTime(e.EndDate)
 
 	if _errStart != nil || _errEnd != nil || _errNow != nil {
 		return false, errors.New("time is not valid")
@@ -53,4 +51,24 @@ func (e Exchange) Save() (bool, error) {
 
 	return false, errors.New("Product or User isn't valid")
 
+}
+
+func GetFormatTime(t string) (time.Time, error) {
+	const shortForm = "2006-Jan-02"
+	if t == "now" {
+		now, _enow := time.Parse(shortForm, time.Now().Format(shortForm))
+		if _enow != nil {
+			return time.Now(), errors.New("Error while converting time.now to format shortForm")
+		}
+
+		return now, nil
+	}
+
+	newTime, _e := time.Parse(shortForm, t)
+
+	if _e != nil {
+		return time.Now(), errors.New("time is not valid")
+	}
+
+	return newTime, nil
 }
