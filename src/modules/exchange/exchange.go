@@ -2,13 +2,13 @@ package exchange
 
 import (
 	"errors"
-	"fmt"
 	"modules/mailSender"
 	"modules/product"
 	"modules/receiver"
 	"time"
 )
 
+// Original exchange struct
 type Exchange struct {
 	Receiver  *receiver.UserStruct
 	Product   product.Product
@@ -16,10 +16,12 @@ type Exchange struct {
 	EndDate   time.Time
 }
 
+// Interface export for the gomock
 type eInterface interface {
 	save() bool
 }
 
+// Original exchange function
 func (e Exchange) Save() (bool, error) {
 
 	dateNow, _errNow := GetFormatTime(time.Now())
@@ -29,9 +31,6 @@ func (e Exchange) Save() (bool, error) {
 	if _errStart != nil || _errEnd != nil || _errNow != nil {
 		return false, errors.New("time is not valid")
 	}
-
-	fmt.Println("before start date ? ", formatStartDate.Before(formatEndDate))
-	fmt.Println("after start date ? ", formatEndDate.After(formatStartDate))
 
 	if e.Receiver.IsValid() && e.Product.IsValid() {
 		// convert the start date and the end date to a real date
@@ -53,6 +52,8 @@ func (e Exchange) Save() (bool, error) {
 
 }
 
+// GetFormatTime (time.Time)
+// parse the time and send a format time based on the layout
 func GetFormatTime(inputTime time.Time) (time.Time, error) {
 	const shortForm = "2006-Jan-02"
 
@@ -63,4 +64,20 @@ func GetFormatTime(inputTime time.Time) (time.Time, error) {
 	}
 
 	return timeFormat, nil
+}
+
+// BuildError build a custom error by comparing params
+// Return error
+func BuildError(content string, c bool, h bool, a string, r string) error {
+	var newStr string
+
+	if !c && !h {
+		newStr = a + " & " + r + " " + content
+	} else if !c {
+		newStr = a + " " + content
+	} else if !h {
+		newStr = r + " " + content
+	}
+
+	return errors.New(newStr)
 }
