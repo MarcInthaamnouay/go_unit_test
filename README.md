@@ -12,7 +12,7 @@ A Go unit test project for the school.
 # How to run the Test unit 
 
 * Go to the **src** folder
-* Use the command **go test -v exchange_test.go** (-v print the log of the test)
+* Use the command **go test -v test/exchange_test.go** (-v print the log of the test)
 
 
 
